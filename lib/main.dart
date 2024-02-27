@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import './models/data_layer.dart';
 
-void main(List<String> args) {
-  runApp(const MyApp());
+void main() {
+  runApp(const MasterPlanApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MasterPlanApp extends StatelessWidget {
+  const MasterPlanApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,13 +21,20 @@ class MyApp extends StatelessWidget {
             tertiary: Colors.grey.shade200),
         useMaterial3: true,
       ),
-      home: const HomePage(),
+      home: const PlanScreen(),
     );
   }
 }
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class PlanScreen extends StatefulWidget {
+  const PlanScreen({super.key});
+
+  @override
+  State<PlanScreen> createState() => _PlanScreenState();
+}
+
+class _PlanScreenState extends State<PlanScreen> {
+  Plan plan = Plan();
 
   @override
   Widget build(BuildContext context) {
@@ -36,38 +44,60 @@ class HomePage extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.secondary,
       ),
-      body: const ContentWidget(),
+      body: _buildList(),
+      floatingActionButton: _buildAddTaskButton(),
     );
   }
-}
 
-class ContentWidget extends StatelessWidget {
-  const ContentWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return ListView.builder(
-          itemCount: 20,
-          itemBuilder: ((context, index) {
-            return const ListItem();
+  Widget _buildTaskTile(Task task, int index) {
+    return ListTile(
+      leading: Checkbox(
+          value: task.complete,
+          onChanged: (selected) {
+            setState(() {
+              plan = Plan(
+                name: plan.name,
+                tasks: List<Task>.from(plan.tasks)
+                  ..[index] = Task(
+                      description: task.description,
+                      complete: selected ?? false),
+              );
+            });
           }),
-        );
-      },
+      title: TextFormField(
+        initialValue: task.description,
+        onChanged: (text) {
+          setState(() {
+            plan = Plan(
+              name: plan.name,
+              tasks: List<Task>.from(plan.tasks)
+                ..[index] = Task(
+                  description: text,
+                  complete: task.complete,
+                ),
+            );
+          });
+        },
+      ),
     );
   }
-}
 
-class ListItem extends StatelessWidget {
-  const ListItem({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const ListTile(
-      leading: Icon(Icons.person),
-      trailing: Icon(Icons.edit),
-      title: Text('Item'),
+  Widget _buildList() {
+    return ListView.builder(
+      itemCount: plan.tasks.length,
+      itemBuilder: (context, index) => _buildTaskTile(plan.tasks[index], index),
     );
+  }
+
+  Widget _buildAddTaskButton() {
+    return FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            plan = Plan(
+                name: plan.name,
+                tasks: List<Task>.from(plan.tasks)..add(const Task()));
+          });
+        },
+        child: const Icon(Icons.add));
   }
 }
