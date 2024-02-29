@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:todolist_flutter/models/task.dart';
 import 'package:todolist_flutter/models/task_list.dart';
+import 'package:todolist_flutter/views/list_tile.dart';
 
 class TaskListView extends StatefulWidget {
   final TaskList taskList;
@@ -17,26 +17,17 @@ class _TaskListViewState extends State<TaskListView> {
     return Column(
       children: [
         Expanded(
-          child: ListView.builder(
-            itemCount: widget.taskList.tasks.length,
-            itemBuilder: ((context, index) => ListTile(
-                  title: Text(widget.taskList.tasks[index].description),
-                )),
-          ),
+          child: widget.taskList.tasks.isEmpty
+              ? const Center(
+                  child: Text('The list is empty'),
+                )
+              : ListView.builder(
+                  itemCount: widget.taskList.tasks.length,
+                  itemBuilder: (context, index) {
+                    return ListTileItem(widget.taskList, index: index);
+                  },
+                ),
         ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: TextField(
-              decoration: const InputDecoration(hintText: "Insira uma tarefa"),
-              onSubmitted: (value) {
-                setState(() {
-                  widget.taskList.tasks.add(Task(value));
-                });
-              },
-            ),
-          ),
-        )
       ],
     );
   }
